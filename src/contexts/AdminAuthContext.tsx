@@ -242,10 +242,12 @@ export const AdminAuthProvider = ({ children }: { children: React.ReactNode }) =
       const redirect = typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('redirect')
         : null
-      // Use window.location.href for full page reload to ensure cookies are sent
-      // This is important for cross-subdomain cookie handling
       const targetPath = redirect || ADMIN_HOME_PATH
-      window.location.href = targetPath
+      // Use window.location for full page reload to ensure cookies are properly set
+      // This is necessary for cross-subdomain cookie handling
+      if (typeof window !== 'undefined') {
+        window.location.href = targetPath
+      }
     }
   }, [admin, isLoading, pathname, router])
 
