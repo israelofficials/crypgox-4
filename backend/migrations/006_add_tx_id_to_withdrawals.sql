@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS user_withdrawals
+  ADD COLUMN IF NOT EXISTS tx_id TEXT;
