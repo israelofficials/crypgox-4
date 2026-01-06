@@ -33,7 +33,6 @@ const ExchangePage = () => {
   const sliderProgressRef = useRef(0)
   const sliderMaxDistanceRef = useRef(0)
   const [isSliding, setIsSliding] = useState(false)
-  const [sliderProgress, setSliderProgress] = useState(0)
   const [sliderOffset, setSliderOffset] = useState(0)
 
   const maskedPhone = useMemo(() => {
@@ -90,14 +89,12 @@ const ExchangePage = () => {
     const ratio = usableWidth === 0 ? 0 : clampedPx / usableWidth
 
     sliderProgressRef.current = ratio
-    setSliderProgress(ratio)
     setSliderOffset(clampedPx)
   }, [])
 
   const resetSlider = useCallback(() => {
     sliderProgressRef.current = 0
     sliderMaxDistanceRef.current = sliderMaxDistanceRef.current || 0
-    setSliderProgress(0)
     setSliderOffset(0)
     setIsSliding(false)
     isSlidingRef.current = false
@@ -138,7 +135,6 @@ const ExchangePage = () => {
       if (sliderProgressRef.current >= 0.92) {
         sliderTriggeredRef.current = true
         sliderProgressRef.current = 1
-        setSliderProgress(1)
         setSliderOffset(sliderMaxDistanceRef.current)
         window.setTimeout(() => {
           router.push('/exchange/sell')
@@ -233,15 +229,17 @@ const ExchangePage = () => {
               </div>
               <div>
                 <p className="text-base font-semibold">{maskedPhone}</p>
-                <p className="text-xs text-white/60">{balanceDisplay} balance</p>
+                <p className="text-xs text-white/60">{balanceDisplay}</p>
               </div>
             </div>
 
             <Link href='/support'>
-              <img
+              <Image
                 src='/support.png'
                 alt='Support'
-                className='h-7 w-7 '
+                width={28}
+                height={28}
+                className='h-7 w-7'
               />
             </Link>
           </div>
@@ -308,7 +306,33 @@ const ExchangePage = () => {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerCancel}
-            className="relative flex w-full items-center overflow-hidden rounded-full bg-gradient-to-r from-emerald-400 to-primary px-4 py-4 text-black shadow-2xl shadow-primary/50"
+            onTouchStart={(e) => {
+              // Improve touch handling for mobile
+              const touch = e.touches[0]
+              if (touch) {
+                handlePointerDown({
+                  clientX: touch.clientX,
+                  pointerId: touch.identifier,
+                } as React.PointerEvent<HTMLDivElement>)
+              }
+            }}
+            onTouchMove={(e) => {
+              const touch = e.touches[0]
+              if (touch && isSlidingRef.current) {
+                handlePointerMove({
+                  clientX: touch.clientX,
+                } as React.PointerEvent<HTMLDivElement>)
+              }
+            }}
+            onTouchEnd={(e) => {
+              const touch = e.changedTouches[0]
+              if (touch) {
+                handlePointerUp({
+                  pointerId: touch.identifier,
+                } as React.PointerEvent<HTMLDivElement>)
+              }
+            }}
+            className="relative flex w-full items-center overflow-hidden rounded-full bg-gradient-to-r from-emerald-400 to-primary px-4 py-4 text-black shadow-2xl shadow-primary/50 touch-none select-none"
             role="button"
             tabIndex={0}
             aria-label="Swipe to sell USDT"
@@ -323,7 +347,6 @@ const ExchangePage = () => {
                   sliderMaxDistanceRef.current = usableWidth
                   setSliderOffset(usableWidth)
                 }
-                setSliderProgress(1)
                 sliderProgressRef.current = 1
                 router.push('/exchange/sell')
               }
@@ -331,7 +354,7 @@ const ExchangePage = () => {
           >
             <div
               ref={sliderKnobRef}
-              className="absolute left-0 top-1/2 z-10 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white shadow-xl shadow-black/30 transition-transform duration-200"
+              className="absolute left-0 top-1/2 z-10 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white shadow-xl shadow-black/30 transition-transform duration-200 touch-none"
               style={{ transform: `translateX(${sliderOffset}px)` }}
             >
               <Icon icon="solar:double-alt-arrow-right-bold" className="text-2xl" />
@@ -340,7 +363,7 @@ const ExchangePage = () => {
               <span className="text-base font-semibold tracking-wide text-black/70">Swipe to sell USDT</span>
             </div>
             <div
-              className="absolute inset-0 rounded-full bg-white/30 transition-opacity"
+              className="absolute inset-0 rounded-full bg-white/30 transition-opacity pointer-events-none"
               style={{ opacity: isSliding ? 0.15 : 0 }}
             />
           </div>
@@ -418,7 +441,7 @@ const ExchangePage = () => {
             <section className="mt-4 space-y-3">
               <header className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-white">Recent withdrawals</p>
-                <Link href="/exchange/withdraw" className="text-xs text-primary">
+                <Link href="/me/statements" className="text-xs text-primary">
                   View all
                 </Link>
               </header>
@@ -452,7 +475,7 @@ const ExchangePage = () => {
             <section className="mt-4 space-y-3">
               <header className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-white">Recent sell orders</p>
-                <Link href="/exchange/sell/history" className="text-xs text-primary">
+                <Link href="/exchange/sell?view=history" className="text-xs text-primary">
                   View all
                 </Link>
               </header>

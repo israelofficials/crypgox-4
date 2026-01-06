@@ -6,6 +6,7 @@ import { Icon } from '@iconify/react'
 import { headerData } from '../Header/Navigation/menuData'
 import Logo from './Logo'
 import HeaderLink from '../Header/Navigation/HeaderLink'
+import Slider from 'react-infinite-logo-slider'
 
 const Header: React.FC = () => {
   const pathUrl = usePathname()
@@ -13,8 +14,12 @@ const Header: React.FC = () => {
   const [sticky, setSticky] = useState(false)
   const [showAnnouncement, setShowAnnouncement] = useState(true)
   const [announcementHeight, setAnnouncementHeight] = useState(0)
+  const [domainSliderHeight, setDomainSliderHeight] = useState(0)
 
   const announcementRef = useRef<HTMLDivElement>(null)
+  const domainSliderRef = useRef<HTMLDivElement>(null)
+
+  const domains = ['crypgox.cloud', 'crypgox.com', 'www.crypgox.cloud', 'www.crypgox.com']
 
   const handleScroll = () => {
     setSticky(window.scrollY >= 80)
@@ -29,10 +34,17 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     const updateHeight = () => {
+      let totalHeight = 0
       if (showAnnouncement && announcementRef.current) {
-        setAnnouncementHeight(announcementRef.current.offsetHeight)
-      } else {
-        setAnnouncementHeight(0)
+        totalHeight += announcementRef.current.offsetHeight
+      }
+      if (domainSliderRef.current) {
+        totalHeight += domainSliderRef.current.offsetHeight
+      }
+      setAnnouncementHeight(totalHeight)
+      
+      if (domainSliderRef.current) {
+        setDomainSliderHeight(domainSliderRef.current.offsetHeight)
       }
     }
 
@@ -46,34 +58,67 @@ const Header: React.FC = () => {
   return (
     <>
       {showAnnouncement && (
-        <div
-          ref={announcementRef}
-          className='fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/60 px-5 py-3 text-sm text-white/70 backdrop-blur-lg'>
-          <div className='mx-auto flex w-full max-w-6xl flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left'>
-            <div className='flex items-center gap-2'>
-              <Icon icon='mdi:google-play' className='text-primary text-xl' />
-              <span className='font-medium tracking-wide'>Official app only supports Android</span>
-            </div>
-            <div className='flex items-center gap-3'>
-              <Link
-                href='/downloads/bahratx-android.apk'
-                download
-                className='flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-background transition hover:bg-primary/80'
-              >
-                <Icon icon='solar:download-linear' className='text-base' />
-                Download app
-              </Link>
-              <button
-                type='button'
-                onClick={() => setShowAnnouncement(false)}
-                className='text-white/60 transition hover:text-white'
-                aria-label='Dismiss announcement'
-              >
-                <Icon icon='solar:close-circle-linear' className='text-xl' />
-              </button>
+        <>
+          <div
+            ref={announcementRef}
+            className='fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/60 px-5 py-3 text-sm text-white/70 backdrop-blur-lg'>
+            <div className='mx-auto flex w-full max-w-6xl flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left'>
+              <div className='flex items-center gap-2'>
+                <Icon icon='mdi:google-play' className='text-primary text-xl' />
+                <span className='font-medium tracking-wide'>Official app only supports Android</span>
+              </div>
+              <div className='flex items-center gap-3'>
+                <Link
+                  href='/downloads/bahratx-android.apk'
+                  download
+                  className='flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-background transition hover:bg-primary/80'
+                >
+                  <Icon icon='solar:download-linear' className='text-base' />
+                  Download app
+                </Link>
+                <button
+                  type='button'
+                  onClick={() => setShowAnnouncement(false)}
+                  className='text-white/60 transition hover:text-white'
+                  aria-label='Dismiss announcement'
+                >
+                  <Icon icon='solar:close-circle-linear' className='text-xl' />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+          
+          {/* Domain Slider */}
+          <div
+            ref={domainSliderRef}
+            className='fixed left-0 right-0 z-50 border-b border-white/10 bg-black/60 backdrop-blur-lg'
+            style={{ top: showAnnouncement && announcementRef.current ? `${announcementRef.current.offsetHeight}px` : '0px' }}
+          >
+            <div className='container mx-auto px-4 py-1.5'>
+              <div className='flex justify-center text-center py-1 relative'>
+                <p className='text-white font-medium text-xs sm:text-sm'>
+                  Official domains · <span className='text-primary font-semibold'>stay safe, always verify the URL</span>
+                </p>
+              </div>
+              <div className='py-1'>
+                <Slider
+                  width="200px"
+                  duration={16}
+                  pauseOnHover
+                  blurBorders={false}
+                >
+                  {domains.map((domain, index) => (
+                    <Slider.Slide key={domain + index}>
+                      <div className='mr-8 w-full h-full flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-white text-xs sm:text-sm font-semibold'>
+                        {domain}
+                      </div>
+                    </Slider.Slide>
+                  ))}
+                </Slider>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       <header

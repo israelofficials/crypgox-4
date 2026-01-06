@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react'
 import Image from 'next/image'
 import PageBottomBar from '@/components/Layout/PageBottomBar'
 import LoadingOverlay from '@/components/shared/LoadingOverlay'
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState, useRef, type PointerEventHandler } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { formatCurrency } from '@/utils/formatters'
 import useProtectedRoute from '@/hooks/useProtectedRoute'
@@ -466,17 +466,11 @@ function SellPageContent() {
 
           {error && <p className="text-xs text-red-400">{error}</p>}
 
-          <button
-            onClick={handleConfirm}
+          <SellSliderButton
+            onConfirm={handleConfirm}
             disabled={isConfirmDisabled}
-            className={`w-full py-4 rounded-full font-semibold transition ${
-              isConfirmDisabled
-                ? 'bg-white/20 text-white/50 cursor-not-allowed'
-                : 'bg-gradient-to-r from-primary to-emerald-400 text-black hover:scale-[1.01]'
-            }`}
-          >
-            {isSubmitting ? 'Processing…' : 'Confirm sell order'}
-          </button>
+            isSubmitting={isSubmitting}
+          />
 
           <p className="text-xs text-white/40">
             Double-check beneficiary details. Incorrect payouts caused by wrong information may not be recoverable.
@@ -872,4 +866,180 @@ const getBeneficiaryLabel = (order: SellOrder) => {
 const maskAccount = (value?: string) => {
   if (!value) return '—'
   return value
+}
+
+const SellSliderButton = ({
+  onConfirm,
+  disabled,
+  isSubmitting,
+}: {
+  onConfirm: () => void
+  disabled: boolean
+  isSubmitting: boolean
+}) => {
+  const sliderTrackRef = useRef<HTMLDivElement | null>(null)
+  const sliderKnobRef = useRef<HTMLDivElement | null>(null)
+  const sliderTriggeredRef = useRef(false)
+  const isSlidingRef = useRef(false)
+  const sliderProgressRef = useRef(0)
+  const sliderMaxDistanceRef = useRef(0)
+  const [isSliding, setIsSliding] = useState(false)
+  const [sliderProgress, setSliderProgress] = useState(0)
+  const [sliderOffset, setSliderOffset] = useState(0)
+
+  const updateSliderProgress = useCallback((clientX: number) => {
+    const track = sliderTrackRef.current
+    const knob = sliderKnobRef.current
+    if (!track || !knob) return
+
+    const trackRect = track.getBoundingClientRect()
+    const knobRect = knob.getBoundingClientRect()
+    const usableWidth = Math.max(trackRect.width - knobRect.width, 0)
+    sliderMaxDistanceRef.current = usableWidth
+
+    const rawPx = clientX - trackRect.left - knobRect.width / 2
+    const clampedPx = Math.min(Math.max(rawPx, 0), usableWidth)
+    const ratio = usableWidth === 0 ? 0 : clampedPx / usableWidth
+
+    sliderProgressRef.current = ratio
+    setSliderProgress(ratio)
+    setSliderOffset(clampedPx)
+  }, [])
+
+  const resetSlider = useCallback(() => {
+    sliderProgressRef.current = 0
+    setSliderProgress(0)
+    setSliderOffset(0)
+    setIsSliding(false)
+    isSlidingRef.current = false
+  }, [])
+
+  const handlePointerDown: PointerEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      if (sliderTriggeredRef.current || disabled) return
+      const track = sliderTrackRef.current
+      if (!track) return
+      isSlidingRef.current = true
+      setIsSliding(true)
+      track.setPointerCapture(event.pointerId)
+      updateSliderProgress(event.clientX)
+    },
+    [updateSliderProgress, disabled]
+  )
+
+  const handlePointerMove: PointerEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      if (!isSlidingRef.current || sliderTriggeredRef.current || disabled) return
+      updateSliderProgress(event.clientX)
+    },
+    [updateSliderProgress, disabled]
+  )
+
+  const finishSliding = useCallback(
+    (pointerId?: number) => {
+      if (!isSlidingRef.current || disabled) return
+      const track = sliderTrackRef.current
+      if (track && typeof pointerId === 'number' && track.hasPointerCapture(pointerId)) {
+        track.releasePointerCapture(pointerId)
+      }
+
+      isSlidingRef.current = false
+      setIsSliding(false)
+
+      if (sliderProgressRef.current >= 0.92) {
+        sliderTriggeredRef.current = true
+        sliderProgressRef.current = 1
+        setSliderProgress(1)
+        setSliderOffset(sliderMaxDistanceRef.current)
+        window.setTimeout(() => {
+          onConfirm()
+          sliderTriggeredRef.current = false
+        }, 160)
+      } else {
+        resetSlider()
+      }
+    },
+    [resetSlider, onConfirm, disabled]
+  )
+
+  const handlePointerUp: PointerEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      finishSliding(event.pointerId)
+    },
+    [finishSliding]
+  )
+
+  const handlePointerCancel: PointerEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      finishSliding(event.pointerId)
+    },
+    [finishSliding]
+  )
+
+  if (disabled) {
+    return (
+      <button
+        disabled
+        className="w-full py-4 rounded-full font-semibold bg-white/20 text-white/50 cursor-not-allowed"
+      >
+        {isSubmitting ? 'Processing…' : 'Confirm sell order'}
+      </button>
+    )
+  }
+
+  return (
+    <div
+      ref={sliderTrackRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onTouchStart={(e) => {
+        const touch = e.touches[0]
+        if (touch) {
+          handlePointerDown({
+            clientX: touch.clientX,
+            pointerId: touch.identifier,
+          } as React.PointerEvent<HTMLDivElement>)
+        }
+      }}
+      onTouchMove={(e) => {
+        const touch = e.touches[0]
+        if (touch && isSlidingRef.current) {
+          handlePointerMove({
+            clientX: touch.clientX,
+          } as React.PointerEvent<HTMLDivElement>)
+        }
+      }}
+      onTouchEnd={(e) => {
+        const touch = e.changedTouches[0]
+        if (touch) {
+          handlePointerUp({
+            pointerId: touch.identifier,
+          } as React.PointerEvent<HTMLDivElement>)
+        }
+      }}
+      className="relative flex w-full items-center overflow-hidden rounded-full bg-gradient-to-r from-emerald-400 to-primary px-4 py-4 text-black shadow-2xl shadow-primary/50 touch-none select-none"
+      role="button"
+      tabIndex={0}
+      aria-label="Swipe to confirm sell order"
+    >
+      <div
+        ref={sliderKnobRef}
+        className="absolute left-0 top-1/2 z-10 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white shadow-xl shadow-black/30 transition-transform duration-200 touch-none"
+        style={{ transform: `translateX(${sliderOffset}px)` }}
+      >
+        <Icon icon="solar:double-alt-arrow-right-bold" className="text-2xl" />
+      </div>
+      <div className="pointer-events-none flex w-full items-center justify-center">
+        <span className="text-base font-semibold tracking-wide text-black/70">
+          {isSubmitting ? 'Processing…' : 'Swipe to confirm sell order'}
+        </span>
+      </div>
+      <div
+        className="absolute inset-0 rounded-full bg-white/30 transition-opacity pointer-events-none"
+        style={{ opacity: isSliding ? 0.15 : 0 }}
+      />
+    </div>
+  )
 }

@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { headerData } from '../Header/Navigation/menuData'
 import { footerlabels } from '@/app/api/data'
 import Image from 'next/image'
-import { Icon } from '@iconify/react'
 import Logo from '../Header/Logo'
 
 const Footer: FC = () => {
@@ -14,19 +13,10 @@ const Footer: FC = () => {
           <div className='lg:col-span-4 md:col-span-6 col-span-6 flex flex-col gap-6'>
             <Logo />
             <p className='text-white/60'>Instant USDT to INR exchange.</p>
-            <nav className='relative z-1 flex flex-col gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 shadow-[0_12px_30px_rgba(16,185,129,0.15)]'>
-              <span className='inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-400/10 px-3 py-1 text-xs uppercase tracking-[0.4em] text-emerald-200/80'>
-                <Icon icon='solar:shield-check-bold-duotone' className='text-base text-emerald-300' />
-                Notice
-              </span>
-              <p className='text-sm text-white/70'>Learn about the developers’ limited involvement and who is accountable for operations.</p>
-              <Link
-                href='/developer-disclaimer'
-                className='inline-flex items-center justify-between gap-3 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-400'
-              >
-                <span>Read the developer disclaimer</span>
-                <Icon icon='solar:alt-arrow-right-bold' className='text-lg' />
-              </Link>
+            <nav className='flex flex-wrap gap-3 text-sm text-white/70'>
+              <Link href='/' className='hover:text-primary transition'>Home</Link>
+              <Link href='/exchange' className='hover:text-primary transition'>Exchange</Link>
+              <Link href='/support' className='hover:text-primary transition'>Support</Link>
             </nav>
           </div>
           <div className='lg:col-span-2 md:col-span-3 col-span-6'>
@@ -65,7 +55,7 @@ const Footer: FC = () => {
             </div>
           </div>
         </div>
-        <p className='text-white/40 text-center py-8 border-t border-white/10'>Design & Develop by <Link className='hover:text-primary' href={"https://google.com/"}>Israel Govt</Link></p>
+        <p className='text-white/40 text-center py-8 border-t border-white/10'>© {new Date().getFullYear()} Crypgox. All rights reserved.</p>
       </div>
     </footer>
   )

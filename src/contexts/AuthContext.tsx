@@ -121,7 +121,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data } = await apiClient.post<RequestOtpResponse>('/auth/otp/request', { phone })
         return data
       } catch (err) {
-        return handleAxiosError(err)
+        // handleAxiosError sets the error state and rejects the promise
+        // We need to re-throw so the caller can handle it
+        throw handleAxiosError(err)
       }
     },
     []

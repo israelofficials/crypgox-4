@@ -15,7 +15,9 @@ export const formatPhone = (phone: string) => {
   if (digits.length <= 4) {
     return digits
   }
-  const prefix = digits.slice(0, Math.max(0, digits.length - 6))
-  const suffix = digits.slice(-4)
-  return `${prefix}${'*'.repeat(Math.max(0, digits.length - prefix.length - suffix.length))}${suffix}`
+  // Show only first 2 digits and last 2 digits, mask the rest
+  const prefix = digits.slice(0, 2)
+  const suffix = digits.slice(-2)
+  const maskedLength = digits.length - 4
+  return `${prefix}${'*'.repeat(maskedLength)}${suffix}`
 }

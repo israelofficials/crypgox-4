@@ -34,11 +34,8 @@ export default function ReferralPage() {
   const inviteLink = useMemo(() => {
     if (!inviteCode) return null
     const params = new URLSearchParams({ ref: inviteCode })
-    if (user?.phone) {
-      params.set('phone', user.phone)
-    }
     return `${process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'https://website.co'}/login?${params.toString()}`
-  }, [inviteCode, user?.phone])
+  }, [inviteCode])
 
   const stats = useMemo(() => {
     const totalReward = inviteSummary?.totalReward ?? referrals.reduce((sum, invite) => sum + invite.reward, 0)
@@ -47,9 +44,8 @@ export default function ReferralPage() {
     const active = inviteSummary?.completed ?? referrals.filter(invite => invite.status === 'COMPLETED').length
     const invited = inviteSummary?.total ?? referrals.length
     const pending = inviteSummary?.pending ?? referrals.filter(invite => invite.status !== 'COMPLETED').length
-    const payoutThreshold = inviteSummary?.payoutThreshold ?? 500
+    const payoutThreshold = inviteSummary?.payoutThreshold ?? 100
     const eligibleForPayout = inviteSummary?.eligibleForPayout ?? availableReward >= payoutThreshold
-    const progress = payoutThreshold > 0 ? Math.min(100, (availableReward / payoutThreshold) * 100) : 0
 
     return {
       totalReward,
@@ -60,13 +56,12 @@ export default function ReferralPage() {
       pending,
       payoutThreshold,
       eligibleForPayout,
-      progress,
     }
   }, [inviteSummary, referrals])
 
   const handleRedeem = useCallback(async () => {
     if (!stats.availableReward || stats.availableReward < stats.payoutThreshold || isRedeeming) {
-      setStatusMessage({ type: 'error', text: `Minimum redeemable referral balance is ₹${stats.payoutThreshold.toLocaleString('en-IN')}.` })
+      setStatusMessage({ type: 'error', text: `Minimum redeemable referral balance is ${stats.payoutThreshold.toLocaleString('en-IN')} USDT.` })
       return
     }
 
@@ -76,7 +71,7 @@ export default function ReferralPage() {
       const result = await redeemReferralRewards()
       setStatusMessage({
         type: 'success',
-        text: `₹${formatCurrency(result.amount)} moved to your balance!`,
+        text: `${formatCurrency(result.amount)} USDT moved to your balance!`,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to redeem referral rewards right now.'
@@ -133,35 +128,23 @@ export default function ReferralPage() {
             <div>
               <p className="text-sm text-white/70">Available to claim</p>
               <p className="text-2xl font-semibold text-emerald-400">
-                {formatCurrency(stats.availableReward)} INR
+                {formatCurrency(stats.availableReward)} USDT
               </p>
               <p className="text-xs text-white/50 mt-1">
-                Unlock at ₹{stats.payoutThreshold.toLocaleString('en-IN')} · {stats.eligibleForPayout ? 'Eligible' : 'Keep inviting'}
+                Unlock at {stats.payoutThreshold.toLocaleString('en-IN')} USDT · {stats.eligibleForPayout ? 'Eligible' : 'Keep inviting'}
               </p>
-              <div className="mt-3 h-2 w-full rounded-full bg-white/10">
-                <div
-                  className={`h-full rounded-full ${stats.eligibleForPayout ? 'bg-emerald-400' : 'bg-primary'}`}
-                  style={{ width: `${stats.progress}%` }}
-                />
-              </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="rounded-lg bg-black/20 p-3">
                 <p className="text-white/50 uppercase tracking-wide">Earned</p>
                 <p className="mt-1 text-sm font-semibold text-white">
-                  {formatCurrency(stats.totalReward)} INR
+                  {formatCurrency(stats.totalReward)} USDT
                 </p>
               </div>
               <div className="rounded-lg bg-black/20 p-3">
                 <p className="text-white/50 uppercase tracking-wide">Redeemed</p>
                 <p className="mt-1 text-sm font-semibold text-white">
-                  {formatCurrency(stats.redeemedReward)} INR
-                </p>
-              </div>
-              <div className="rounded-lg bg-black/20 p-3">
-                <p className="text-white/50 uppercase tracking-wide">Progress</p>
-                <p className="mt-1 text-sm font-semibold text-white">
-                  {Math.round(stats.progress)}%
+                  {formatCurrency(stats.redeemedReward)} USDT
                 </p>
               </div>
             </div>
@@ -171,7 +154,7 @@ export default function ReferralPage() {
               </div>
             ) : (
               <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60">
-                Earn ₹{formatCurrency(Math.max(0, stats.payoutThreshold - stats.availableReward))} more to unlock balance transfers.
+                Earn {formatCurrency(Math.max(0, stats.payoutThreshold - stats.availableReward))} USDT more to unlock balance transfers.
               </div>
             )}
             <p className="text-xs text-white/50 mt-1">

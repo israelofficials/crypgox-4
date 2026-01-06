@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { Icon } from '@iconify/react/dist/iconify.js'
-import BrandLogo from '../BrandLogo'
 import { useAuth } from '@/contexts/AuthContext'
 
 type CurrencyCardConfig = {
@@ -129,7 +128,7 @@ const Hero = () => {
 
   return (
     <section
-      className='relative py-24 pt-52 md:pt-44 lg:pt-48 overflow-x-hidden z-1'
+      className='relative py-24 pt-64 md:pt-56 lg:pt-60 overflow-x-hidden z-1'
       id='main-banner'
     >
       <div className='container'>
@@ -252,8 +251,6 @@ const Hero = () => {
             </div>
           </motion.div>
         </div>
-
-        <BrandLogo />
       </div>
     </section>
   )

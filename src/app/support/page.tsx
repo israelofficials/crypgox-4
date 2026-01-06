@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Icon } from '@iconify/react'
-import Link from 'next/link'
 
 declare global {
   interface Window {
@@ -35,18 +34,6 @@ const contactChannels = [
     title: 'Live chat',
     description: 'Chat with our support specialists in real time for instant help.',
     icon: 'solar:chat-round-line-duotone',
-  },
-  {
-    title: 'Raise a ticket',
-    description: 'Leave a detailed message on CrypGo Help and our team will follow up within 12 hours.',
-    icon: 'mdi:ticket-confirmation-outline',
-    href: 'https://crypgo.tawk.help/',
-  },
-  {
-    title: 'Knowledge base',
-    description: 'Read how-tos, troubleshooting guides, and policy updates anytime.',
-    icon: 'solar:book-bookmark-bold-duotone',
-    href: '/#faq',
   },
 ]
 
@@ -157,10 +144,6 @@ const SupportPage = () => {
     }
   }, [isMobile, scrollToEmbedded])
 
-  const openTicketForm = useCallback(() => {
-    window.open('https://crypgo.tawk.help/', '_blank', 'noopener,noreferrer')
-  }, [])
-
   return (
     <main className="min-h-screen bg-[#050913] text-white">
       <section className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-5 py-16">
@@ -182,31 +165,18 @@ const SupportPage = () => {
               <Icon icon="solar:chat-round-bold" className="text-lg" />
               {widgetReady ? 'Start live chat' : 'Loading chat…'}
             </button>
-            <button
-              onClick={openTicketForm}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              <Icon icon="solar:document-add-bold" className="text-lg" />
-              Raise a ticket
-            </button>
           </div>
           <p className="text-xs text-white/40 sm:hidden">
             Tip: the chat bubble floats above the bottom-right corner on mobile; tap it to switch between live chat and the ticket form.
           </p>
         </header>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-3">
+        <div className="mt-12 grid gap-4 sm:grid-cols-1">
           {contactChannels.map(channel => (
             <div key={channel.title} className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:border-primary/40 hover:bg-primary/10">
               <Icon icon={channel.icon} className="text-3xl text-primary" />
               <h2 className="mt-4 text-lg font-semibold">{channel.title}</h2>
               <p className="mt-2 text-sm text-white/60">{channel.description}</p>
-              {channel.href && (
-                <Link href={channel.href} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary">
-                  Explore guides
-                  <Icon icon="solar:arrow-right-up-bold" />
-                </Link>
-              )}
             </div>
           ))}
         </div>

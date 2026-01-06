@@ -19,18 +19,6 @@ const quickLinks = [
     href: '/me/settings/business',
   },
   {
-    key: 'terms',
-    title: 'Terms and Conditions',
-    caption: 'Terms and Conditions',
-    href: '/me/settings/business',
-  },
-  {
-    key: 'developers',
-    title: 'Developer disclaimer',
-    caption: 'Our role & responsibility',
-    href: '/me/settings/developers',
-  },
-  {
     key: 'install',
     title: 'Install the official version',
     caption: 'Install the official version',

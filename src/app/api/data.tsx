@@ -1,8 +1,8 @@
 export const footerlabels: { label: string; herf: string }[] = [
-  { label: "Terms", herf: "#" },
-  { label: "Disclosures", herf: "#" },
-  { label: "Latest News", herf: "#" },
-  { label: "Documentation", herf: "/documentation" },
+  { label: "Terms", herf: "/developer-disclaimer" },
+  { label: "Disclosures", herf: "/developer-disclaimer" },
+  { label: "Disclaimer", herf: "/developer-disclaimer" },
+  { label: "Documentation", herf: "/developer-disclaimer" },
 ];
 
 export const perksData: {

@@ -9,12 +9,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import useProtectedRoute from '@/hooks/useProtectedRoute'
 import LoadingOverlay from '@/components/shared/LoadingOverlay'
 
-const buildInviteLink = (code: string | null, phone: string | null) => {
+const buildInviteLink = (code: string | null) => {
   if (!code) return null
   const params = new URLSearchParams({ ref: code })
-  if (phone) {
-    params.set('phone', phone)
-  }
   return `https://website.co/?${params.toString()}`
 }
 
@@ -25,8 +22,11 @@ export default function InvitePage() {
   const [copied, setCopied] = useState<'code' | 'link' | null>(null)
 
   const inviteCode = user?.invites?.code ?? null
-  const inviteLink = useMemo(() => buildInviteLink(inviteCode, user?.phone ?? null), [inviteCode, user?.phone])
-  const inviteCommission = useMemo(() => Number(settings?.inviteCommission ?? 0), [settings?.inviteCommission])
+  const inviteLink = useMemo(() => buildInviteLink(inviteCode), [inviteCode])
+  const inviteCommission = useMemo(() => {
+    const commission = Number(settings?.inviteCommission ?? 0)
+    return commission > 0 ? commission : 0
+  }, [settings?.inviteCommission])
 
   const copy = async (text: string, type: 'code' | 'link') => {
     await navigator.clipboard.writeText(text)
@@ -71,9 +71,11 @@ export default function InvitePage() {
             <p className="text-lg font-semibold text-emerald-400">
               {user?.invites ? `${user.invites.completed} completed · ${user.invites.pending} pending` : 'Start inviting to earn'}
             </p>
-            <p className="mt-1 text-xs text-white/60">
-              Current commission: <span className="font-semibold text-primary">{inviteCommission.toFixed(2)}%</span>
-            </p>
+            {inviteCommission > 0 && (
+              <p className="mt-1 text-xs text-white/60">
+                Current commission: <span className="font-semibold text-primary">{inviteCommission.toFixed(2)}%</span>
+              </p>
+            )}
           </div>
 
           {/* QR */}

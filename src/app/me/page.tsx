@@ -10,14 +10,6 @@ import useProtectedRoute from '@/hooks/useProtectedRoute'
 import LoadingOverlay from '@/components/shared/LoadingOverlay'
 import { formatCurrency, formatPhone } from '@/utils/formatters'
 
-const maskPhone = (value: string) => {
-  if (value.length <= 6) return value
-  const country = value.slice(0, 4)
-  const start = value.slice(4, 7)
-  const end = value.slice(-4)
-  return `${country} ${start}****${end}`
-}
-
 const MePage = () => {
   useProtectedRoute()
   const { user, isLoading, isAuthenticated } = useAuth()
@@ -41,14 +33,6 @@ const MePage = () => {
     [user]
   )
 
-  const statements = useMemo(() => user?.statements ?? [], [user?.statements])
-  const latestStatement = statements[0]
-  const inviteSummary = user?.invites
-  const inviteRewardTotal = useMemo(
-    () => inviteSummary?.list.reduce((total, entry) => total + entry.reward, 0) ?? 0,
-    [inviteSummary?.list]
-  )
-  const totalWithdrawals = user?.stats?.totalWithdrawals ?? 0
 
   const actions = useMemo(
     () => [
@@ -56,42 +40,34 @@ const MePage = () => {
         label: 'Referrals',
         icon: 'solar:users-group-rounded-bold',
         href: '/me/referrals',
-        description: inviteSummary
-          ? `${inviteSummary.completed} completed · ${inviteSummary.pending} pending`
-          : 'Track your network growth',
       },
       {
         label: 'Exchange history',
         icon: 'solar:clock-circle-bold',
         href: '/exchange/sell?view=history',
-        description: latestStatement
-          ? `${latestStatement.type.replaceAll('_', ' ')} • ${formatCurrency(latestStatement.amount)}`
-          : 'No exchange history yet',
       },
       {
         label: 'Statement',
         icon: 'solar:document-text-bold',
         href: '/me/statements',
-        description: `${statements.length} entries on file`,
       },
       {
         label: 'Bank account',
         icon: 'solar:wallet-bold',
         href: '/exchange/sell?view=bank',
-        description: `${formatCurrency(totalWithdrawals)} withdrawn`,
       },
       {
         label: 'Invite friends',
         icon: 'solar:gift-bold',
         href: '/exchange/invite',
-        description: inviteSummary ? `Code ${inviteSummary.code} · ${formatCurrency(inviteRewardTotal)} rewards` : 'Share your invite code',
       },
     ],
-    [inviteSummary, inviteRewardTotal, latestStatement, statements, totalWithdrawals]
+    []
   )
 
   const unmaskedPhone = user?.phone ? `+91 ${user.phone}` : '—'
   const formattedPhone = user?.phone ? `+91 ${formatPhone(user.phone)}` : '—'
+  const inviteSummary = user?.invites
 
   if (isLoading || !isAuthenticated) {
     return <LoadingOverlay label="Loading your profile" />
@@ -187,7 +163,6 @@ const MePage = () => {
                     <Icon icon={action.icon} className="text-2xl text-primary" />
                     <span className="text-left">
                       <span className="block">{action.label}</span>
-                      <span className="block text-xs text-white/50">{action.description}</span>
                     </span>
                   </span>
                   <Icon icon="solar:alt-arrow-right-bold" className="text-xl text-white/40" />

@@ -4,11 +4,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Icon } from '@iconify/react'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
 const LoginPageContent = () => {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/exchange'
   const referralParam = searchParams.get('ref')
@@ -88,10 +87,13 @@ const LoginPageContent = () => {
         setRequiresName(Boolean(response.requiresName))
         setPendingOtp('')
         setName('')
+      } else {
+        // If response doesn't have expiresAt, it's an error - but this shouldn't happen
+        // The error should already be set by requestOtp
       }
     } catch {
       // Error is already set by requestOtp in AuthContext
-      // Don't proceed to OTP step if request failed
+      // The catch block ensures we don't proceed if there's an error
     } finally {
       setIsRequesting(false)
     }
@@ -132,11 +134,21 @@ const LoginPageContent = () => {
     clearError()
     try {
       await verifyOtp(phoneNumber, code, undefined, referralCode || undefined)
-      router.replace(redirectTo)
+      // Don't redirect here - let the useEffect handle it when isAuthenticated becomes true
+      // This ensures the cookie is properly set before redirect
+    } catch (err) {
+      // Error is already set by verifyOtp in AuthContext
+      const errorMessage = err instanceof Error ? err.message : 'Failed to verify OTP'
+      if (errorMessage.includes('expired') || errorMessage.includes('not requested')) {
+        // If OTP expired or not found, go back to phone step to request new OTP
+        setStep('phone')
+        setOtpValues(Array(4).fill(''))
+        setPendingOtp('')
+      }
     } finally {
       setIsVerifying(false)
     }
-  }, [isOtpComplete, isVerifying, requiresName, clearError, verifyOtp, phoneNumber, otpValues, referralCode, router, redirectTo])
+  }, [isOtpComplete, isVerifying, requiresName, clearError, verifyOtp, phoneNumber, otpValues, referralCode])
 
   const handleSubmitName = useCallback(async () => {
     if (!pendingOtp || !isNameValid || isVerifying) return
@@ -144,22 +156,28 @@ const LoginPageContent = () => {
     clearError()
     try {
       await verifyOtp(phoneNumber, pendingOtp, trimmedName, referralCode || undefined)
-      router.replace(redirectTo)
+      // Don't redirect here - let the useEffect handle it when isAuthenticated becomes true
+      // This ensures the cookie is properly set before redirect
     } catch (err) {
       // If OTP verification fails (expired, invalid, etc.), show error
       // Error is already set by verifyOtp in AuthContext
-      // Optionally, we could redirect back to OTP step if OTP expired
       const errorMessage = err instanceof Error ? err.message : 'Failed to verify OTP'
       if (errorMessage.includes('expired') || errorMessage.includes('not requested')) {
         // If OTP expired or not found, go back to phone step to request new OTP
         setStep('phone')
         setPendingOtp('')
         setOtpValues(Array(4).fill(''))
+        setRequiresName(false)
+      } else {
+        // For other errors, go back to OTP step so user can try again
+        setStep('otp')
+        setPendingOtp('')
+        setOtpValues(Array(4).fill(''))
       }
     } finally {
       setIsVerifying(false)
     }
-  }, [pendingOtp, isNameValid, isVerifying, clearError, verifyOtp, phoneNumber, trimmedName, referralCode, router, redirectTo])
+  }, [pendingOtp, isNameValid, isVerifying, clearError, verifyOtp, phoneNumber, trimmedName, referralCode])
 
   return (
     <main className='relative min-h-screen overflow-hidden bg-gradient-to-br from-[#05080d] via-[#0b1220] to-[#06090f] text-white'>
@@ -197,7 +215,7 @@ const LoginPageContent = () => {
         </div>
       )}
 
-      <div className='mx-auto flex min-h-[calc(100vh-120px)] w-full max-w-lg flex-col px-6 pb-16 pt-20 sm:pt-24'>
+      <div className='mx-auto flex min-h-screen w-full max-w-lg flex-col px-6 pb-6 pt-20 sm:pt-24'>
         <div className='mb-10 flex items-center justify-between text-sm text-white/60'>
           <Link href='/' className='flex items-center gap-2 transition hover:text-white'>
             <Icon icon='solar:arrow-left-linear' className='text-2xl' />
@@ -239,6 +257,11 @@ const LoginPageContent = () => {
                     />
                   </div>
                 </label>
+                {error && (
+                  <div className='text-xs text-red-400 bg-red-500/10 border border-red-400/20 rounded-lg px-4 py-2'>
+                    {error}
+                  </div>
+                )}
                 <button
                   type='button'
                   onClick={handleRequestOtp}
@@ -317,6 +340,11 @@ const LoginPageContent = () => {
             ) : (
               <div className='space-y-6'>
                 <p className='text-sm text-white/60'>Enter your full name to complete setup.</p>
+                {error && (
+                  <div className='text-xs text-red-400 bg-red-500/10 border border-red-400/20 rounded-lg px-4 py-2'>
+                    {error}
+                  </div>
+                )}
                 <label className='flex flex-col gap-3 text-sm text-white/60'>
                   <span>Full name</span>
                   <input
@@ -349,6 +377,7 @@ const LoginPageContent = () => {
                     onClick={() => {
                       setStep('otp')
                       setName('')
+                      clearError()
                     }}
                   >
                     Back to OTP
