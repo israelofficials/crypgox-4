@@ -17,6 +17,11 @@ const isPublicPath = (pathname: string) => {
     return true
   }
 
+  // Allow static files with common extensions
+  if (/\.(apk|apng|avif|gif|jpg|jpeg|jfif|pjpeg|pjp|png|svg|webp|ico|pdf|txt|xml|json)$/i.test(pathname)) {
+    return true
+  }
+
   return (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
@@ -77,5 +82,15 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|assets|.*\\..*).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - Static file extensions (images, fonts, apk, etc.)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:apk|png|jpg|jpeg|gif|svg|webp|ico|pdf|txt|xml|json|woff|woff2|ttf|eot)).*)',
+  ],
 }
