@@ -195,8 +195,8 @@ const LoginPageContent = () => {
             </div>
             <div className='flex items-center gap-3'>
               <Link
-                href='/downloads/bahratx-android.apk'
-                download
+                href='/api/download/apk'
+                  download='crypgox.apk'
                 className='flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-background transition hover:bg-primary/80'
               >
                 <Icon icon='mdi:download-circle' className='text-base' />
