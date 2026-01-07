@@ -6,7 +6,7 @@ import PageBottomBar from '@/components/Layout/PageBottomBar'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import useProtectedRoute from '@/hooks/useProtectedRoute'
-import LoadingOverlay from '@/components/shared/LoadingOverlay'
+import LoadingOverlay from '@/components/shared/LoadingOverlay' 
 import { formatCurrency } from '@/utils/formatters'
 
 const statusBadgeStyles: Record<string, string> = {
@@ -56,32 +56,49 @@ export default function StatementPage() {
             statements.map(statement => {
               const metadata = (statement.metadata ?? {}) as Record<string, unknown>
               const method = typeof metadata.method === 'string' ? metadata.method : null
+              const isAdminAdjustment = statement.type === 'ADMIN_BALANCE_ADJUSTMENT'
+              const reason = isAdminAdjustment && typeof metadata.reason === 'string' ? metadata.reason : null
+              const adjustedBy = isAdminAdjustment && typeof metadata.adjustedBy === 'string' ? metadata.adjustedBy : null
 
               return (
                 <div
                   key={statement.id}
-                  className="rounded-xl bg-[#0e1628] p-4 flex justify-between"
+                  className="rounded-xl bg-[#0e1628] p-4 space-y-2"
                 >
-                  <div>
-                    <p className="font-semibold flex items-center gap-1">
-                      {statement.type.replaceAll('_', ' ')}
-                      {method && (
-                        <span className="text-xs text-white/50">({method})</span>
-                      )}
-                    </p>
-                    <p className="text-xs text-white/50">
-                      {new Date(statement.createdAt).toLocaleString('en-IN')}
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-semibold flex items-center gap-1">
+                        {statement.type.replaceAll('_', ' ')}
+                        {method && (
+                          <span className="text-xs text-white/50">({method})</span>
+                        )}
+                        {isAdminAdjustment && adjustedBy && (
+                          <span className="text-xs text-white/50">by {adjustedBy}</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-white/50">
+                        {new Date(statement.createdAt).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+
+                    <p
+                      className={`font-semibold text-right ${
+                        statement.amount >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                      }`}
+                    >
+                      {statement.amount >= 0 ? '+' : ''}
+                      {formatCurrency(statement.amount)} {user?.currency ?? 'USDT'}
                     </p>
                   </div>
-
-                  <p
-                    className={`font-semibold ${
-                      statement.amount >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {statement.amount >= 0 ? '+' : ''}
-                    {formatCurrency(statement.amount)} {user?.currency ?? 'USDT'}
-                  </p>
+                  
+                  {isAdminAdjustment && reason && (
+                    <div className="pt-2 border-t border-white/10">
+                      <p className="text-xs text-white/60">
+                        <span className="text-white/80 font-medium">Reason: </span>
+                        {reason}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )
             })

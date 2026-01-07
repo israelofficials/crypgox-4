@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@iconify/react'
 import { useRouter } from 'next/navigation'
-import { useAdminAuth, AdminUser } from '@/contexts/AdminAuthContext'
+import { useAdminAuth, AdminUser } from '@/contexts/AdminAuthContext' 
 import { formatCurrency } from '@/utils/formatters'
 import { getPresetRange, DateRangePreset } from '@/utils/dateRanges'
 
@@ -319,7 +319,7 @@ const UsersPage = () => {
                       </p>
                       <button
                         onClick={handleStartEditBalance}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity rounded-lg bg-white/5 px-2 py-1 text-xs text-white/60 hover:bg-white/10 hover:text-white/80"
+                        className="opacity-100 rounded-lg bg-white/5 px-2 py-1 text-xs text-white/60 hover:bg-white/10 hover:text-white/80"
                         title="Edit balance"
                       >
                         <Icon icon="solar:pen-bold" className="text-sm" />

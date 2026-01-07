@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { Icon } from '@iconify/react/dist/iconify.js'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContext' 
 
 type CurrencyCardConfig = {
   asset: 'USDT' | 'INR'
@@ -15,7 +15,7 @@ type CurrencyCardConfig = {
 }
 
 const Hero = () => {
-  const { settings } = useAuth()
+  const { settings, isAuthenticated } = useAuth()
   const DEFAULT_BASE_RATE = 99
   const baseRate = useMemo(() => Number(settings?.baseRate ?? DEFAULT_BASE_RATE), [settings?.baseRate])
 
@@ -241,11 +241,11 @@ const Hero = () => {
                 </div>
 
                 <Link
-                  href='/login'
+                  href={isAuthenticated ? '/exchange/sell' : '/login'}
                   className='flex items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-base font-semibold text-background transition-colors hover:bg-primary/80'
                 >
-                  <Icon icon='solar:login-2-bold-duotone' className='text-xl' />
-                  Login to sell
+                  <Icon icon={isAuthenticated ? 'solar:banknote-2-bold-duotone' : 'solar:login-2-bold-duotone'} className='text-xl' />
+                  {isAuthenticated ? 'Sell now' : 'Login to sell'}
                 </Link>
               </div>
             </div>
