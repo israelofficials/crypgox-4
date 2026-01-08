@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { Icon } from '@iconify/react/dist/iconify.js'
-import { useAuth } from '@/contexts/AuthContext' 
+import { useAuth } from '@/contexts/AuthContext'
 
 type CurrencyCardConfig = {
   asset: 'USDT' | 'INR'

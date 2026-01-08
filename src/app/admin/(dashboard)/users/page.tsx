@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Icon } from '@iconify/react'
 import { useRouter } from 'next/navigation'
-import { useAdminAuth, AdminUser } from '@/contexts/AdminAuthContext' 
+import { useAdminAuth, AdminUser } from '@/contexts/AdminAuthContext'
 import { formatCurrency } from '@/utils/formatters'
 import { getPresetRange, DateRangePreset } from '@/utils/dateRanges'
 

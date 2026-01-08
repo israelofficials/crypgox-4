@@ -44,6 +44,12 @@ const isUserAuthPath = (pathname: string) => pathname === '/login'
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
+  // Skip middleware entirely for static files with extensions
+  // This is a safety check in case the matcher doesn't catch them
+  if (/\.(apk|apng|avif|gif|jpg|jpeg|jfif|pjpeg|pjp|png|svg|webp|ico|pdf|txt|xml|json|woff|woff2|ttf|eot)$/i.test(pathname)) {
+    return NextResponse.next()
+  }
+
   if (isPublicPath(pathname)) {
     return NextResponse.next()
   }
@@ -84,13 +90,13 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except for:
      * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - Static file extensions (images, fonts, apk, etc.)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:apk|png|jpg|jpeg|gif|svg|webp|ico|pdf|txt|xml|json|woff|woff2|ttf|eot)).*)',
+    '/((?!api|_next/static|_next/image|favicon\\.ico|crypgox\\.apk|.*\\.(?:apk|png|jpg|jpeg|gif|svg|webp|ico|pdf|txt|xml|json|woff|woff2|ttf|eot)).*)',
   ],
 }

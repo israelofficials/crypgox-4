@@ -22,7 +22,13 @@ const quickLinks = [
     key: 'install',
     title: 'Install the official version',
     caption: 'Install the official version',
-    href: '#',
+    href: '/api/download/apk',
+  },
+  {
+    key: 'kyc',
+    title: 'KYC',
+    caption: 'Know Your Customer',
+    href: '/me/settings/kyc',
   },
 ]
 
@@ -57,6 +63,7 @@ const SettingsPage = () => {
               <Link
                 key={item.key}
                 href={item.href}
+                download={item.key === 'install' ? 'crypgox.apk' : undefined}
                 className="flex items-center justify-between px-4 py-4 text-left"
               >
                 <div>

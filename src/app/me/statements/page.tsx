@@ -6,7 +6,7 @@ import PageBottomBar from '@/components/Layout/PageBottomBar'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import useProtectedRoute from '@/hooks/useProtectedRoute'
-import LoadingOverlay from '@/components/shared/LoadingOverlay' 
+import LoadingOverlay from '@/components/shared/LoadingOverlay'
 import { formatCurrency } from '@/utils/formatters'
 
 const statusBadgeStyles: Record<string, string> = {
