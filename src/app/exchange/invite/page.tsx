@@ -117,7 +117,7 @@ export default function InvitePage() {
             <p className="text-xs text-white/60">Invite link</p>
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm break-all text-white/80">
-                {inviteLink ?? 'Tell your friends to sign up from crypgo app'}
+                {inviteLink ?? 'Tell your friends to sign up from crypgox app'}
               </span>
               {inviteLink && (
                 <button

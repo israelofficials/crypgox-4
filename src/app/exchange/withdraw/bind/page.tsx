@@ -9,18 +9,11 @@ import useProtectedRoute from '@/hooks/useProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import apiClient from '@/lib/api'
 
-const NETWORKS: Array<{ label: string; value: 'TRC20' | 'ERC20'; icon: string }> = [
-  { label: 'TRC20', value: 'TRC20', icon: '/tron.svg' },
-  { label: 'ERC20', value: 'ERC20', icon: '/eth.svg' },
-]
-
 export default function BindWalletPage() {
   useProtectedRoute()
 
   const router = useRouter()
   const { refreshProfile, user } = useAuth()
-
-  const [network, setNetwork] = useState<'TRC20' | 'ERC20'>('TRC20')
   const [address, setAddress] = useState('')
   const [label, setLabel] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -42,7 +35,7 @@ export default function BindWalletPage() {
     try {
       await apiClient.post('/user/wallets', {
         address: address.trim(),
-        network,
+        network: 'TRC20',
         label: label.trim() || undefined,
       })
 
@@ -57,7 +50,7 @@ export default function BindWalletPage() {
     } finally {
       setIsSubmitting(false)
     }
-  }, [address, network, label, refreshProfile, router])
+  }, [address, label, refreshProfile, router])
 
   return (
     <main className="min-h-screen bg-[#00050f] flex justify-center text-white">
@@ -72,30 +65,13 @@ export default function BindWalletPage() {
 
         <div className="px-4 py-5 space-y-5">
           <section className="space-y-3">
-            <p className="text-sm text-white/70">Network</p>
-            <div className="flex gap-3">
-              {NETWORKS.map(({ label: networkLabel, value, icon }) => {
-                const isActive = network === value
-                return (
-                  <button
-                    type="button"
-                    key={value}
-                    onClick={() => setNetwork(value)}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                      isActive
-                        ? 'bg-emerald-500/10 ring-1 ring-emerald-400 text-emerald-200'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
-                    }`}
-                  >
-                    <Image src={icon} alt={networkLabel} width={20} height={20} />
-                    {networkLabel}
-                  </button>
-                )
-              })}
+            <div>
+              <p className="text-sm text-white/70 mb-2">Network</p>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-400 text-emerald-200 w-fit">
+                <Image src="/tron.svg" alt="TRC20" width={20} height={20} />
+                <span className="font-semibold text-sm">TRC20</span>
+              </div>
             </div>
-          </section>
-
-          <section className="space-y-3">
             <div className="space-y-2">
               <label className="text-sm text-white/70" htmlFor="wallet-address">
                 Wallet address

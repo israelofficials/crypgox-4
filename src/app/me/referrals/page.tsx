@@ -97,7 +97,7 @@ export default function ReferralPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join me on CrypGo',
+          title: 'Join me on crypgox',
           text: 'Use my referral code to sign up and start earning together.',
           url: inviteLink,
         })

@@ -15,7 +15,6 @@ export default function DepositPage() {
   useProtectedRoute()
   const router = useRouter()
   const { user, isLoading, isAuthenticated } = useAuth()
-  const [network, setNetwork] = useState<'TRC20' | 'ERC20'>('TRC20')
   const [amount, setAmount] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -74,19 +73,9 @@ export default function DepositPage() {
           {/* NETWORK */}
           <div>
             <p className="text-sm text-white/70 mb-2">Network</p>
-            <div className="flex gap-3">
-              <NetworkBtn
-                active={network === 'TRC20'}
-                label="TRC20"
-                icon="/tron.svg"
-                onClick={() => setNetwork('TRC20')}
-              />
-              <NetworkBtn
-                active={network === 'ERC20'}
-                label="ERC20"
-                icon="/eth.svg"
-                onClick={() => setNetwork('ERC20')}
-              />
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-yellow-400/20 ring-1 ring-yellow-400 w-fit">
+              <Image src="/tron.svg" alt="TRC20" width={18} height={18} />
+              <span className="font-semibold">TRC20</span>
             </div>
           </div>
 
@@ -136,7 +125,7 @@ export default function DepositPage() {
               try {
                 const { data } = await apiClient.post<{ deposit: { id: string } }>('/user/deposits', {
                   amount: numericAmount,
-                  network,
+                  network: 'TRC20',
                 })
                 router.push(`/exchange/deposit/order?depositId=${data.deposit.id}`)
               } catch (err) {
@@ -175,17 +164,3 @@ export default function DepositPage() {
     </main>
   )
 }
-
-const NetworkBtn = ({ active, label, icon, onClick }: any) => (
-  <button
-    onClick={onClick}
-    className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold ${
-      active
-        ? 'bg-yellow-400/20 ring-1 ring-yellow-400'
-        : 'bg-white/5'
-    }`}
-  >
-    <Image src={icon} alt={label} width={18} height={18} />
-    {label}
-  </button>
-)

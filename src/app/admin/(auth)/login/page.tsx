@@ -68,7 +68,7 @@ function AdminLoginContent() {
               value={username}
               onChange={e => setUsername(e.target.value)}
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-emerald-400"
-              placeholder="admin@crypgo.com"
+              placeholder="admin@crypgox.com"
             />
           </div>
 

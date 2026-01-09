@@ -9,7 +9,7 @@ import MarketList from '@/components/Home/MarketList'
 import Faq from '@/components/Home/Faq'
 import PlatformPrice from '@/components/Home/PlatformPrice'
 export const metadata: Metadata = {
-  title: 'crypgo',
+  title: 'crypgox',
 }
 
 export default function Home() {
